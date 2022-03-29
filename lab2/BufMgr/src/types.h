@@ -28,35 +28,35 @@ typedef std::uint32_t FrameId;
  * @brief Identifier for a record in a page.
  */
 struct RecordId {
-  /**
-   * Number of page containing this record.
-   */
-  PageId page_number;
+    /**
+     * Number of page containing this record.
+     */
+    PageId page_number;
 
-  /**
-   * Number of slot within the page containing this record.
-   */
-  SlotId slot_number;
+    /**
+     * Number of slot within the page containing this record.
+     */
+    SlotId slot_number;
 
-  /**
-   * Returns true if this record ID refers to the same record as the given ID.
-   *
-   * @param rhs   Record ID to compare against.
-   * @return  Whether the other ID refers to the same record as this one.
-   */
-  bool operator==(const RecordId& rhs) const {
-    return page_number == rhs.page_number && slot_number == rhs.slot_number;
-  }
+    /**
+     * Returns true if this record ID refers to the same record as the given ID.
+     *
+     * @param rhs   Record ID to compare against.
+     * @return  Whether the other ID refers to the same record as this one.
+     */
+    bool operator==(const RecordId& rhs) const {
+        return page_number == rhs.page_number && slot_number == rhs.slot_number;
+    }
 
-  /**
-   * Returns true if this record ID is different from the record as the given ID.
-   *
-   * @param rhs   Record ID to compare against.
-   * @return  Whether the other ID is different from record as this one.
-   */
-  bool operator!=(const RecordId& rhs) const {
-    return (page_number != rhs.page_number) || (slot_number != rhs.slot_number);
-  }
+    /**
+     * Returns true if this record ID is different from the record as the given ID.
+     *
+     * @param rhs   Record ID to compare against.
+     * @return  Whether the other ID is different from record as this one.
+     */
+    bool operator!=(const RecordId& rhs) const {
+        return (page_number != rhs.page_number) || (slot_number != rhs.slot_number);
+    }
 };
 
-}
+}  // namespace badgerdb
