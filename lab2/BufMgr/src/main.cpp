@@ -47,7 +47,7 @@ int main() {
     // Clean up from any previous runs that crashed.
     try {
         File::remove(filename);
-    } catch (FileNotFoundException) {
+    } catch (const FileNotFoundException& e) {
     }
 
     {
@@ -69,17 +69,14 @@ int main() {
         }
 
         // Iterate through all pages in the file.
-        for (FileIterator iter = new_file.begin();
-             iter != new_file.end();
-             ++iter) {
-            // Iterate through all records on the page.
-            for (PageIterator page_iter = (*iter).begin();
-                 page_iter != (*iter).end();
-                 ++page_iter) {
-                std::cout << "Found record: " << *page_iter
-                          << " on page " << (*iter).page_number() << "\n";
-            }
-        }
+        // for (FileIterator iter = new_file.begin(); iter != new_file.end(); ++iter) {
+        //     // Iterate through all records on the page.
+        //     for (PageIterator page_iter = (*iter).begin();
+        //          page_iter != (*iter).end();
+        //          ++page_iter) {
+        //         std::cout << "Found record: " << *page_iter << " on page " << (*iter).page_number() << "\n";
+        //     }
+        // }
 
         // Retrieve the third page and add another record to it.
         Page third_page = new_file.readPage(third_page_number);
@@ -87,8 +84,7 @@ int main() {
         new_file.writePage(third_page);
 
         // Retrieve the record we just added to the third page.
-        std::cout << "Third page has a new record: "
-                  << third_page.getRecord(rid) << "\n\n";
+        std::cout << "Third page has a new record: " << third_page.getRecord(rid) << "\n\n";
     }
     // new_file goes out of scope here, so file is automatically closed.
 
@@ -116,7 +112,7 @@ void testBufMgr() {
         File::remove(filename3);
         File::remove(filename4);
         File::remove(filename5);
-    } catch (FileNotFoundException e) {
+    } catch (const FileNotFoundException& e) {
     }
 
     File file1 = File::create(filename1);
@@ -134,10 +130,15 @@ void testBufMgr() {
     // Test buffer manager
     // Comment tests which you do not wish to run now. Tests are dependent on their preceding tests. So, they have to be run in the following order.
     // Commenting  a particular test requires commenting all tests that follow it else those tests would fail.
+    // std::cout << "*****\n";
     test1();
+    // std::cout << "*****\n";
     test2();
+    // std::cout << "*****\n";
     test3();
+    // std::cout << "*****\n";
     test4();
+    // std::cout << "*****\n";
     test5();
     test6();
 
@@ -165,10 +166,15 @@ void testBufMgr() {
 void test1() {
     // Allocating pages in a file...
     for (i = 0; i < num; i++) {
+        std::cout << "*****\n";
         bufMgr->allocPage(file1ptr, pid[i], page);
+        std::cout << "*****\n";
         sprintf((char*)tmpbuf, "test.1 Page %d %7.1f", pid[i], (float)pid[i]);
+        std::cout << "*****\n";
         rid[i] = page->insertRecord(tmpbuf);
+        std::cout << "*****\n";
         bufMgr->unPinPage(file1ptr, pid[i], true);
+        std::cout << "*****\n";
     }
 
     // Reading pages back...
@@ -235,7 +241,7 @@ void test3() {
     try {
         bufMgr->readPage(file4ptr, 1, page);
         PRINT_ERROR("ERROR :: File4 should not exist. Exception should have been thrown before execution reaches this point.");
-    } catch (InvalidPageException e) {
+    } catch (const InvalidPageException& e) {
     }
 
     std::cout << "Test 3 passed"
@@ -248,7 +254,7 @@ void test4() {
     try {
         bufMgr->unPinPage(file4ptr, i, false);
         PRINT_ERROR("ERROR :: Page is already unpinned. Exception should have been thrown before execution reaches this point.");
-    } catch (PageNotPinnedException e) {
+    } catch (const PageNotPinnedException& e) {
     }
 
     std::cout << "Test 4 passed"
@@ -266,7 +272,7 @@ void test5() {
     try {
         bufMgr->allocPage(file5ptr, tmp, page);
         PRINT_ERROR("ERROR :: No more frames left for allocation. Exception should have been thrown before execution reaches this point.");
-    } catch (BufferExceededException e) {
+    } catch (const BufferExceededException& e) {
     }
 
     std::cout << "Test 5 passed"
@@ -285,7 +291,7 @@ void test6() {
     try {
         bufMgr->flushFile(file1ptr);
         PRINT_ERROR("ERROR :: Pages pinned for file being flushed. Exception should have been thrown before execution reaches this point.");
-    } catch (PagePinnedException e) {
+    } catch (const PagePinnedException& e) {
     }
 
     std::cout << "Test 6 passed"
