@@ -52,11 +52,12 @@ void BufMgr::advanceClock() {
 }
 
 void BufMgr::allocBuf(FrameId& frame) {
-    advanceClock();
-
     uint8_t bufPinned = 0;
-    while (bufDescTable[clockHand].valid) {
+    while (true) {
         advanceClock();
+        if (!bufDescTable[clockHand].valid) {
+            break;
+        }
         if (bufDescTable[clockHand].refbit) {
             bufDescTable[clockHand].refbit = false;
         } else {
@@ -64,17 +65,24 @@ void BufMgr::allocBuf(FrameId& frame) {
                 if (bufDescTable[clockHand].dirty) {
                     bufDescTable[clockHand].file->writePage(bufPool[clockHand]);
                 }
-                bufDescTable[clockHand].valid = false;
+                bufDescTable[clockHand].dirty = false;
+                break;
             } else {
                 bufPinned++;
+                if (bufPinned == numBufs) {
+                    throw BufferExceededException();
+                }
             }
         }
-        if (bufPinned == numBufs) {
-            throw BufferExceededException();
+    }
+    frame = clockHand;
+
+    if (bufDescTable[clockHand].valid) {
+        try {
+            hashTable->remove(bufDescTable[clockHand].file, bufDescTable[clockHand].pageNo);
+        } catch (const HashNotFoundException& e) {
         }
     }
-
-    frame = clockHand;
 }
 
 void BufMgr::readPage(File* file, const PageId pageNo, Page*& page) {
@@ -127,7 +135,7 @@ void BufMgr::flushFile(const File* file) {
 
 void BufMgr::allocPage(File* file, PageId& pageNo, Page*& page) {
     Page page_tmp = file->allocatePage();
-    pageNo = page->page_number();
+    pageNo = page_tmp.page_number();
 
     FrameId frame;
     allocBuf(frame);

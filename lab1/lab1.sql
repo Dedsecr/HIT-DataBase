@@ -23,7 +23,7 @@ SELECT model FROM PC WHERE speed >= ALL (SELECT speed FROM PC);
 SELECT model FROM PC AS P1 WHERE NOT EXISTS (SELECT * FROM PC AS P2 WHERE P2.speed > P1.speed);
 
 
-SELECT DISTINCT P1.maker FROM ((Product AS P1 NATURAL JOIN PC AS PC1) JOIN (Product AS P2 NATURAL JOIN PC AS PC2) ON (P1.maker = P2.maker) JOIN (Product AS P3 NATURAL JOIN PC AS PC3) ON (P1.maker = P3.maker)) WHERE PC1.speed != PC2.speed AND PC1.speed != PC3.speed AND PC2.speed
+SELECT DISTINCT P1.maker FROM ((Product AS P1 NATURAL JOIN PC AS PC1) JOIN (Product AS P2 NATURAL JOIN PC AS PC2) ON (P1.maker = P2.maker) JOIN (Product AS P3 NATURAL JOIN PC AS PC3) ON (P1.maker = P3.maker)) WHERE PC1.speed != PC2.speed AND PC1.speed != PC3.speed AND PC2.speed != PC3.speed;
 
 SELECT maker FROM Product NATURAL JOIN PC GROUP BY maker HAVING COUNT(DISTINCT speed) >= 3;
 

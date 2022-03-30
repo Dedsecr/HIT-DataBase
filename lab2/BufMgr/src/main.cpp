@@ -69,14 +69,15 @@ int main() {
         }
 
         // Iterate through all pages in the file.
-        // for (FileIterator iter = new_file.begin(); iter != new_file.end(); ++iter) {
-        //     // Iterate through all records on the page.
-        //     for (PageIterator page_iter = (*iter).begin();
-        //          page_iter != (*iter).end();
-        //          ++page_iter) {
-        //         std::cout << "Found record: " << *page_iter << " on page " << (*iter).page_number() << "\n";
-        //     }
-        // }
+        for (FileIterator iter = new_file.begin(); iter != new_file.end(); ++iter) {
+            Page p = *iter;
+            // Iterate through all records on the page.
+            for (PageIterator page_iter = p.begin();
+                 page_iter != p.end();
+                 ++page_iter) {
+                std::cout << "Found record: " << *page_iter << " on page " << p.page_number() << "\n";
+            }
+        }
 
         // Retrieve the third page and add another record to it.
         Page third_page = new_file.readPage(third_page_number);
@@ -166,15 +167,10 @@ void testBufMgr() {
 void test1() {
     // Allocating pages in a file...
     for (i = 0; i < num; i++) {
-        std::cout << "*****\n";
         bufMgr->allocPage(file1ptr, pid[i], page);
-        std::cout << "*****\n";
         sprintf((char*)tmpbuf, "test.1 Page %d %7.1f", pid[i], (float)pid[i]);
-        std::cout << "*****\n";
         rid[i] = page->insertRecord(tmpbuf);
-        std::cout << "*****\n";
         bufMgr->unPinPage(file1ptr, pid[i], true);
-        std::cout << "*****\n";
     }
 
     // Reading pages back...
@@ -199,7 +195,7 @@ void test2() {
         sprintf((char*)tmpbuf, "test.2 Page %d %7.1f", pageno2, (float)pageno2);
         rid2 = page2->insertRecord(tmpbuf);
 
-        int index = random() % num;
+        int index = rand() % num;
         pageno1 = pid[index];
         bufMgr->readPage(file1ptr, pageno1, page);
         sprintf((char*)tmpbuf, "test.1 Page %d %7.1f", pageno1, (float)pageno1);
