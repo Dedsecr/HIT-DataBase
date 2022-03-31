@@ -150,10 +150,10 @@ void BufMgr::disposePage(File* file, const PageId PageNo) {
     try {
         hashTable->lookup(file, PageNo, frame);
         bufDescTable[frame].Clear();
+        hashTable->remove(file, PageNo);
     } catch (const HashNotFoundException& e) {
     }
 
-    hashTable->remove(file, PageNo);
     file->deletePage(PageNo);
 }
 
