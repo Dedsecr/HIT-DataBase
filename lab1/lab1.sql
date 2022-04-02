@@ -1,4 +1,4 @@
-SELECT DISTINCT maker FROM Product WHERE type = 'laptop' MINUS SELECT DISTINCT maker FROM Product WHERE type = 'pc';
+(SELECT DISTINCT maker FROM Product WHERE type = 'laptop') MINUS (SELECT DISTINCT maker FROM Product WHERE type = 'pc');
 
 SELECT DISTINCT maker FROM Product WHERE type = 'laptop' AND maker NOT IN (SELECT DISTINCT maker FROM Product WHERE type = 'pc');
 
@@ -32,6 +32,6 @@ SELECT maker FROM (SELECT maker, COUNT(DISTINCT speed) AS c FROM Product NATURAL
 
 UPDATE PC SET price = price * 0.9 WHERE 'A' = (SELECT maker FROM Product WHERE PC.model = Product.model);
 
-UPDATE PC SET price = price * 0.9 WHERE model in (SELECT model FROM Product WHERE maker = 'A');
+UPDATE PC SET price = price * 0.9 WHERE model IN (SELECT model FROM Product WHERE maker = 'A');
 
 UPDATE PC AS P1 SET price = price * 0.9 WHERE EXISTS (SELECT * FROM Product AS P2 WHERE P1.model = P2.model AND P2.maker = 'A');
