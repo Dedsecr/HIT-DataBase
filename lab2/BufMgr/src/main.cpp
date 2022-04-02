@@ -131,15 +131,10 @@ void testBufMgr() {
     // Test buffer manager
     // Comment tests which you do not wish to run now. Tests are dependent on their preceding tests. So, they have to be run in the following order.
     // Commenting  a particular test requires commenting all tests that follow it else those tests would fail.
-    // std::cout << "*****\n";
     test1();
-    // std::cout << "*****\n";
     test2();
-    // std::cout << "*****\n";
     test3();
-    // std::cout << "*****\n";
     test4();
-    // std::cout << "*****\n";
     test5();
     test6();
 
