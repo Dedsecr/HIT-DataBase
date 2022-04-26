@@ -19,21 +19,21 @@ namespace badgerdb {
  * Heap file manager for inserting and deleting tuples
  */
 class HeapFileManager {
- public:
-  /**
-   * Insert a tuple to a table
-   */
-  static RecordId insertTuple(const string& tuple, File& file, BufMgr* bufMgr);
+public:
+    /**
+     * Insert a tuple to a table
+     */
+    static RecordId insertTuple(const string& tuple, File& file, BufMgr* bufMgr);
 
-  /**
-   * Delete a tuple from a table
-   */
-  static void deleteTuple(const RecordId& rid, File& file, BufMgr* bufMgr);
+    /**
+     * Delete a tuple from a table
+     */
+    static void deleteTuple(const RecordId& rid, File& file, BufMgr* bufMgr);
 
-  /**
-   * Create a tuple from an SQL statement
-   */
-  static string createTupleFromSQLStatement(const string& sql,
-                                            const Catalog* catalog);
+    /**
+     * Create a tuple from an SQL statement
+     */
+    static string createTupleFromSQLStatement(const string& sql,
+                                              const Catalog* catalog);
 };
 }  // namespace badgerdb
