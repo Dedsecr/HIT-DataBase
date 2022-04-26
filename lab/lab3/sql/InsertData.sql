@@ -1,0 +1,1 @@
+INSERT INTO Book (title, time, price, rating) VALUES ('A', '2006', '29.00', '8.9');
