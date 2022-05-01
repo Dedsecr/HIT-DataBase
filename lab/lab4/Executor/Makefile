@@ -16,6 +16,7 @@ all:
 	g++ -std=c++0x *.cpp exceptions/*.cpp -I. -Wall -o badgerdb_main
 
 clean:
+	rm *.tbl;\
 	cd src;\
 	rm -f badgerdb_main test.?
 

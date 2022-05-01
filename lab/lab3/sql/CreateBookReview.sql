@@ -78,11 +78,8 @@ CREATE TABLE Review(
     `body` TEXT NOT NULL,
     PRIMARY KEY(`review_id`),
     FOREIGN KEY(`book_id`) REFERENCES Book(`id`) ON DELETE CASCADE,
-	FOREIGN KEY(`reviewer_id`) REFERENCES Reviewer(`id`) ON DELETE CASCADE,
-    KEY `book_id` (`book_id`),
-    KEY `reviewer_id` (`reviewer_id`)
+	FOREIGN KEY(`reviewer_id`) REFERENCES Reviewer(`id`) ON DELETE CASCADE
 );
-
 
 CREATE TABLE LikeReview(
 	`reviewer_id` INT,
@@ -101,13 +98,14 @@ CREATE TABLE Follow(
 );
 
 
-
 CREATE VIEW view_books AS SELECT Book.id, Book.title, Author.name AS author, Translator.name AS translator, Press.name AS press, Book.time, Book.price, AVG(Review.rating) FROM Book LEFT JOIN WriteBook ON WriteBook.book_id=Book.id LEFT JOIN Author ON Author.id=WriteBook.author_id LEFT JOIN TranslateBook ON TranslateBook.book_id=Book.id LEFT JOIN Translator ON Translator.id=TranslateBook.translator_id LEFT JOIN Publish ON Publish.book_id=Book.id LEFT JOIN Press ON Press.id=Publish.press_id LEFT JOIN Review ON Review.book_id=Book.id GROUP BY Book.id, Book.title, author, translator, press, Book.time, Book.price;
 
 CREATE VIEW view_reviews AS SELECT Review.review_id, Book.title AS title, Reviewer.name AS reviewer, Review.time, Review.rating, Review.body, COUNT(LikeReview.reviewer_id) AS like_num FROM Review LEFT JOIN Reviewer ON Reviewer.id=Review.reviewer_id LEFT JOIN Book ON Book.id=Review.book_id LEFT JOIN LikeReview ON LikeReview.review_id=Review.review_id GROUP BY Review.review_id;
 
+-- for view view_follow
 CREATE VIEW view_followed_num AS SELECT fed_Reviewer.id AS fed_id, fed_Reviewer.name AS fed_name, fed_Reviewer.gender AS fed_gender, COUNT(fing_Reviewer.name) AS fed_num FROM Follow RIGHT JOIN Reviewer AS fed_Reviewer ON fed_Reviewer.id=Follow.fed_id LEFT JOIN Reviewer AS fing_Reviewer ON fing_Reviewer.id=Follow.fing_id GROUP BY fed_Reviewer.name;
 
+-- for view view_follow
 CREATE VIEW view_following_num AS SELECT fing_Reviewer.id AS fing_id, fing_Reviewer.name AS fing_name, fing_Reviewer.gender AS fing_gender, COUNT(fed_Reviewer.name) AS fing_num FROM Follow RIGHT JOIN Reviewer AS fing_Reviewer ON fing_Reviewer.id=Follow.fing_id LEFT JOIN Reviewer AS fed_Reviewer ON fed_Reviewer.id=Follow.fed_id GROUP BY fing_Reviewer.name;
 
 CREATE VIEW view_follow AS SELECT fed_id AS id, fed_name AS name, fed_gender AS gender, fed_num, fing_num FROM view_followed_num FULL JOIN view_following_num ON fed_id=fing_id;

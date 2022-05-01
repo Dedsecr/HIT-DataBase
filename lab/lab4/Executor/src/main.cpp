@@ -90,6 +90,7 @@ void testOnePassJoin(BufMgr* bufMgr, Catalog* catalog) {
     string filename = leftTableSchema.getTableName() + "_OPJ_" +
                       rightTableSchema.getTableName() + ".tbl";
     File resultFile = File::create(filename);
+    catalog->addTableSchema(resultSchema, filename);
     joinOperator.execute(100, resultFile);
 
     // Print running statistics
@@ -118,6 +119,7 @@ void testNestedLoopJoin(BufMgr* bufMgr, Catalog* catalog) {
     string filename = leftTableSchema.getTableName() + "_NLJ_" +
                       rightTableSchema.getTableName() + ".tbl";
     File resultFile = File::create(filename);
+    catalog->addTableSchema(resultSchema, filename);
     joinOperator.execute(10, resultFile);
 
     // Print running statistics
@@ -148,6 +150,7 @@ void testGraceHashJoin(BufMgr* bufMgr, Catalog* catalog) {
                       rightTableSchema.getTableName() + ".tbl";
     File resultFile = File::create(filename);
     cout << resultFile.filename() << endl;
+    catalog->addTableSchema(resultSchema, filename);
     joinOperator.execute(50, resultFile);
 
     // Print running statistics

@@ -292,8 +292,48 @@ bool OnePassJoinOperator::execute(int numAvailableBufPages, File& resultFile) {
     return true;
 }
 
-bool NestedLoopJoinOperator::execute(int numAvailableBufPages,
-                                     File& resultFile) {
+/**
+ * @brief Create a Data From Tuple object
+ *
+ * @param record
+ * @param schema
+ * @return vector<string>
+ */
+vector<string> createDataFromTuple(string record, badgerdb::TableSchema schema) {
+    vector<string> ret;
+    int prev = 0;
+    for (int i = 0; i < schema.getAttrCount(); i++) {
+        DataType dataType = schema.getAttrType(i);
+
+        switch (dataType) {
+        case INT: {
+            int value = 0;
+            for (int j = 0; j < 4; j++)
+                value = (value << 8) + record[prev + j];
+            ret.push_back(to_string(value));
+            prev += 4;
+            break;
+        }
+        case CHAR: {
+            int length = schema.getAttrMaxSize(i);
+            ret.push_back(record.substr(prev, length));
+            prev += length + (4 - (length % 4)) % 4;
+            break;
+        }
+        case VARCHAR: {
+            int length = record[prev];
+            prev += 1;
+            ret.push_back(record.substr(prev, length));
+            prev += length + (4 - ((length + 1) % 4)) % 4;
+            break;
+        }
+        }
+    }
+
+    return ret;
+}
+
+bool NestedLoopJoinOperator::execute(int numAvailableBufPages, File& resultFile) {
     if (isComplete)
         return true;
 
@@ -301,7 +341,76 @@ bool NestedLoopJoinOperator::execute(int numAvailableBufPages,
     numUsedBufPages = 0;
     numIOs = 0;
 
-    // TODO: Execute the join algorithm
+    badgerdb::TableId leftTableId = catalog->getTableId("r");
+    badgerdb::TableId rightTableId = catalog->getTableId("s");
+    badgerdb::File left = File::open(catalog->getTableFilename(leftTableId));
+    badgerdb::File right = File::open(catalog->getTableFilename(rightTableId));
+
+    int leftForeignKeyId, rightForeignKeyId;
+    vector<int> rightOnlyAttrIds;
+    for (int j = 0; j < rightTableSchema.getAttrCount(); j++) {
+        bool rightOnly = true;
+        for (int i = 0; i < leftTableSchema.getAttrCount(); i++) {
+            if ((leftTableSchema.getAttrName(i) == rightTableSchema.getAttrName(j)) && (leftTableSchema.getAttrType(i) == rightTableSchema.getAttrType(j))) {
+                leftForeignKeyId = i;
+                rightForeignKeyId = j;
+                rightOnly = false;
+            }
+        }
+        if (rightOnly)
+            rightOnlyAttrIds.push_back(j);
+    }
+
+    vector<badgerdb::Page*> bufferedLeftPages;
+    badgerdb::FileIterator leftPage = left.begin();
+
+    while (leftPage != left.end()) {
+        while (leftPage != left.end() && bufferedLeftPages.size() < numAvailableBufPages - 1) {
+            badgerdb::Page* bufferedLeftPage;
+            bufMgr->readPage(&left, (*leftPage).page_number(), bufferedLeftPage);
+            numIOs += 1;
+            bufferedLeftPages.push_back(bufferedLeftPage);
+            leftPage++;
+        }
+        for (int index = 0; index < bufferedLeftPages.size(); index++) {
+            badgerdb::Page* bufferedLeftPage = bufferedLeftPages[index];
+
+            for (badgerdb::FileIterator rightPage = right.begin(); rightPage != right.end(); rightPage++) {
+                badgerdb::Page* bufferedRightPage;
+                bufMgr->readPage(&right, (*rightPage).page_number(), bufferedRightPage);
+                numIOs += 1;
+
+                for (badgerdb::PageIterator leftRecord = bufferedLeftPage->begin(); leftRecord != bufferedLeftPage->end(); leftRecord++) {
+                    vector<string> leftInfo = createDataFromTuple(*leftRecord, leftTableSchema);
+                    numUsedBufPages += 1;
+
+                    for (badgerdb::PageIterator rightRecord = bufferedRightPage->begin(); rightRecord != bufferedRightPage->end(); rightRecord++) {
+                        vector<string> rightInfo = createDataFromTuple(*rightRecord, rightTableSchema);
+                        numUsedBufPages += 1;
+
+                        if (leftInfo[leftForeignKeyId] == rightInfo[rightForeignKeyId]) {
+                            string sql = "INSERT INTO TEMP_TABLE VALUES (" + leftInfo[0];
+                            for (int i = 1; i < leftTableSchema.getAttrCount(); i++) {
+                                sql += ", " + leftInfo[i];
+                            }
+                            int rightOnlyAttrIdsSize = rightOnlyAttrIds.size();
+                            for (int i = 0; i < rightOnlyAttrIdsSize; i++) {
+                                sql += ", " + rightInfo[rightOnlyAttrIds[i]];
+                            }
+                            sql += ");";
+
+                            string tuple = HeapFileManager::createTupleFromSQLStatement(sql, catalog);
+                            HeapFileManager::insertTuple(tuple, resultFile, bufMgr);
+                            numResultTuples += 1;
+                        }
+                    }
+                }
+                bufMgr->unPinPage(&right, (*rightPage).page_number(), false);
+            }
+            bufMgr->unPinPage(&left, bufferedLeftPage->page_number(), false);
+        }
+        bufferedLeftPages.clear();
+    }
 
     isComplete = true;
     return true;
