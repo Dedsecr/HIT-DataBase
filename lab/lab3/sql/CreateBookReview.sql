@@ -78,7 +78,9 @@ CREATE TABLE Review(
     `body` TEXT NOT NULL,
     PRIMARY KEY(`review_id`),
     FOREIGN KEY(`book_id`) REFERENCES Book(`id`) ON DELETE CASCADE,
-	FOREIGN KEY(`reviewer_id`) REFERENCES Reviewer(`id`) ON DELETE CASCADE
+	FOREIGN KEY(`reviewer_id`) REFERENCES Reviewer(`id`) ON DELETE CASCADE,
+    KEY `book_id` (`book_id`),
+    KEY `reviewer_id` (`reviewer_id`)
 );
 
 CREATE TABLE LikeReview(
