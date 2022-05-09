@@ -8,7 +8,7 @@ CREATE TABLE Book (
     `time` YEAR,
     `price` DECIMAL(8, 2),
     PRIMARY KEY (`id`),
-    UNIQUE KEY `title` (`title`)
+    UNIQUE KEY `title_uni` (`title`)
 );
 
 CREATE TABLE Press (
@@ -16,7 +16,7 @@ CREATE TABLE Press (
     `name` VARCHAR(128) NOT NULL,
     `location` VARCHAR(128),
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name_uni` (`name`)
 );
 
 CREATE TABLE Author (
@@ -25,7 +25,7 @@ CREATE TABLE Author (
     `country` VARCHAR(128),
     `gender` ENUM('F', 'M', 'UNK') DEFAULT 'UNK',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name_uni` (`name`)
 );
 
 CREATE TABLE Translator (
@@ -34,7 +34,7 @@ CREATE TABLE Translator (
     `country` VARCHAR(128),
     `gender` ENUM('F', 'M', 'UNK') DEFAULT 'UNK',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name_uni` (`name`)
 );
 
 CREATE TABLE Reviewer(
@@ -42,7 +42,7 @@ CREATE TABLE Reviewer(
     `name` VARCHAR(128) NOT NULL,
     `gender` ENUM('F', 'M', 'UNK') DEFAULT 'UNK',
     PRIMARY KEY(`id`),
-    UNIQUE KEY `name` (`name`)
+    UNIQUE KEY `name_uni` (`name`)
 );
 
 CREATE TABLE Publish(
@@ -78,9 +78,7 @@ CREATE TABLE Review(
     `body` TEXT NOT NULL,
     PRIMARY KEY(`review_id`),
     FOREIGN KEY(`book_id`) REFERENCES Book(`id`) ON DELETE CASCADE,
-	FOREIGN KEY(`reviewer_id`) REFERENCES Reviewer(`id`) ON DELETE CASCADE,
-    KEY `book_id` (`book_id`),
-    KEY `reviewer_id` (`reviewer_id`)
+	FOREIGN KEY(`reviewer_id`) REFERENCES Reviewer(`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE LikeReview(
